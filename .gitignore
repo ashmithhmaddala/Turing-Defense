@@ -1,0 +1,48 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+*.egg-info/
+dist/
+build/
+
+# PyTorch
+*.pth
+!backend/models/*.pth
+
+# Node
+node_modules/
+npm-debug.log*
+.npm
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Environment
+.env
+.env.local
+*.log
+
+# Datasets (large files)
+backend/datasets/balabit/
+backend/datasets/*.csv
+*.csv
+
+# Build outputs
+*.egg
+*.whl

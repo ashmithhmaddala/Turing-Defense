@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Turing Defense - Integration Example</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 2rem;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 1.5rem;
+        }
+        
+        .card h2 {
+            font-size: 1.25rem;
+            color: #333;
+            margin-bottom: 1rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        label {
+            display: block;
+            font-weight: 500;
+            color: #444;
+            margin-bottom: 0.5rem;
+        }
+        
+        input, textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+        
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #1da1f2;
+        }
+        
+        button {
+            width: 100%;
+            padding: 1rem;
+            background: #1da1f2;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        button:hover {
+            background: #1a91da;
+        }
+        
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .status-card {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        
+        .score-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            font-weight: 700;
+            color: white;
+            flex-shrink: 0;
+        }
+        
+        .score-circle.human {
+            background: linear-gradient(135deg, #17bf63, #0d9e4a);
+        }
+        
+        .score-circle.bot {
+            background: linear-gradient(135deg, #e0245e, #b81c4a);
+        }
+        
+        .score-circle.unknown {
+            background: linear-gradient(135deg, #657786, #4a5a68);
+        }
+        
+        .score-number {
+            font-size: 1.5rem;
+            line-height: 1;
+        }
+        
+        .score-label {
+            font-size: 0.625rem;
+            text-transform: uppercase;
+            opacity: 0.9;
+        }
+        
+        .status-info h3 {
+            color: #333;
+            margin-bottom: 0.25rem;
+        }
+        
+        .status-info p {
+            color: #666;
+            font-size: 0.875rem;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.5rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #eee;
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1da1f2;
+        }
+        
+        .stat-label {
+            font-size: 0.6875rem;
+            color: #666;
+            text-transform: uppercase;
+        }
+        
+        .debug {
+            font-family: monospace;
+            font-size: 0.75rem;
+            background: #1a1a2e;
+            color: #4ade80;
+            padding: 1rem;
+            border-radius: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .debug-line {
+            margin-bottom: 0.25rem;
+        }
+        
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            display: none;
+        }
+        
+        .blocked-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛡️ Turing Defense Demo</h1>
+        <p class="subtitle">See the bot detection SDK in action on a sample form</p>
+        
+        <!-- Status Card -->
+        <div class="card">
+            <div class="status-card">
+                <div class="score-circle unknown" id="scoreCircle">
+                    <span class="score-number" id="scoreNumber">—</span>
+                    <span class="score-label">Score</span>
+                </div>
+                <div class="status-info">
+                    <h3 id="statusTitle">Analyzing behavior...</h3>
+                    <p id="statusDesc">Move your mouse and interact with the form below</p>
+                </div>
+            </div>
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-value" id="statMouse">0</div>
+                    <div class="stat-label">Mouse</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="statKeys">0</div>
+                    <div class="stat-label">Keys</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="statClicks">0</div>
+                    <div class="stat-label">Clicks</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="statScrolls">0</div>
+                    <div class="stat-label">Scrolls</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sample Form -->
+        <div class="card">
+            <h2>Sample Login Form</h2>
+            <form id="sampleForm">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" placeholder="Enter your email">
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="Enter your password">
+                </div>
+                <div class="form-group">
+                    <label for="message">Message (optional)</label>
+                    <textarea id="message" rows="3" placeholder="Type something..."></textarea>
+                </div>
+                <!-- Hidden field for Turing Defense token -->
+                <input type="hidden" id="tdToken" name="turing_token">
+                <button type="submit" id="submitBtn">Sign In</button>
+            </form>
+            <div class="success-message" id="successMsg">
+                ✅ Form submitted successfully! You were verified as human.
+            </div>
+            <div class="blocked-message" id="blockedMsg">
+                🚫 Submission blocked! Bot-like behavior detected.
+            </div>
+        </div>
+        
+        <!-- Debug Console -->
+        <div class="card">
+            <h2>Debug Console</h2>
+            <div class="debug" id="debugConsole">
+                <div class="debug-line">[INIT] Waiting for SDK...</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Include Turing Defense SDK -->
+    <script src="/sdk/turing-defense.js" 
+            data-endpoint="http://localhost:5000"
+            data-site-key="demo-site"
+            data-debug="true"></script>
+    
+    <script>
+        // Debug logging
+        function log(msg) {
+            const console = document.getElementById('debugConsole');
+            const time = new Date().toLocaleTimeString();
+            console.innerHTML += `<div class="debug-line">[${time}] ${msg}</div>`;
+            console.scrollTop = console.scrollHeight;
+        }
+        
+        // Update UI with score
+        function updateScore(result) {
+            const score = result.bot_score || 0;
+            const isBot = score > 50;
+            
+            // Update circle
+            const circle = document.getElementById('scoreCircle');
+            circle.classList.remove('human', 'bot', 'unknown');
+            circle.classList.add(isBot ? 'bot' : 'human');
+            
+            document.getElementById('scoreNumber').textContent = Math.round(score);
+            
+            // Update status
+            document.getElementById('statusTitle').textContent = 
+                isBot ? '🤖 Bot Detected' : '✅ Human Verified';
+            document.getElementById('statusDesc').textContent = 
+                `Confidence: ${Math.round(result.confidence || 0)}%`;
+            
+            // Update token
+            if (result.token) {
+                document.getElementById('tdToken').value = result.token;
+            }
+            
+            log(`Score: ${score.toFixed(1)}, Bot: ${isBot}, Token: ${result.token?.slice(0, 20)}...`);
+        }
+        
+        // Update stats
+        function updateStats() {
+            if (window.TuringDefense) {
+                const stats = TuringDefense.getStats();
+                document.getElementById('statMouse').textContent = stats.mousePoints;
+                document.getElementById('statKeys').textContent = stats.keystrokes;
+                document.getElementById('statClicks').textContent = stats.clicks;
+                document.getElementById('statScrolls').textContent = stats.scrollEvents;
+            }
+        }
+        
+        // Wait for SDK to load
+        function initSDK() {
+            if (window.TuringDefense) {
+                log('[SDK] Turing Defense loaded v' + TuringDefense.version);
+                
+                // Initialize if not auto-started
+                if (!TuringDefense.getSessionId()) {
+                    TuringDefense.init({
+                        endpoint: 'http://localhost:5000',
+                        siteKey: 'demo-site',
+                        debug: true
+                    });
+                }
+                
+                log('[SDK] Session: ' + TuringDefense.getSessionId());
+                
+                // Listen for results
+                TuringDefense.onResult(function(result) {
+                    log('[RESULT] Received analysis');
+                    updateScore(result);
+                });
+                
+                // Update stats periodically
+                setInterval(updateStats, 500);
+                
+            } else {
+                log('[SDK] Waiting for SDK to load...');
+                setTimeout(initSDK, 100);
+            }
+        }
+        
+        // Form submission
+        document.getElementById('sampleForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const score = TuringDefense.getScore();
+            const token = TuringDefense.getToken();
+            
+            log('[FORM] Submit attempt - Score: ' + score);
+            
+            if (score !== null && score > 50) {
+                // Blocked
+                document.getElementById('blockedMsg').style.display = 'block';
+                document.getElementById('successMsg').style.display = 'none';
+                log('[FORM] ❌ Blocked - bot detected');
+            } else if (token) {
+                // Success
+                document.getElementById('successMsg').style.display = 'block';
+                document.getElementById('blockedMsg').style.display = 'none';
+                log('[FORM] ✅ Success - token: ' + token.slice(0, 20) + '...');
+                
+                // In real usage, you would submit the form with the token
+                // and verify it on your server using /api/verify-token
+            } else {
+                log('[FORM] ⏳ Still collecting data, please wait...');
+            }
+        });
+        
+        // Start
+        initSDK();
+    </script>
+</body>
+</html>
