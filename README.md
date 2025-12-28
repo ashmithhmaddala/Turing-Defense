@@ -280,4 +280,7 @@ pytest tests/ -v
 
 ## License
 
-MIT License
+This project is proprietary software. See the [LICENSE](LICENSE) file for details.
+
+**© 2025 Ashmith Maddala. All rights reserved.**
+
