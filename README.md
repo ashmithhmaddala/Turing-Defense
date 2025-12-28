@@ -123,7 +123,7 @@ npm run dev
 docker-compose up --build
 ```
 
-Access the application at `http://localhost:5173`
+Access the application at `http://localhost:5174` (frontend) and `http://localhost:5000` (API)
 
 ---
 
@@ -144,8 +144,17 @@ turing-defense/
 │   └── datasets/                 # Training data
 ├── client/
 │   ├── src/
-│   │   ├── App.jsx               # Main application
-│   │   └── App.css               # Styles
+│   │   ├── components/           # Navbar, Footer, Icons
+│   │   ├── pages/                # Multi-page UI
+│   │   │   ├── HomePage.jsx      # Landing page
+│   │   │   ├── DemoPage.jsx      # Interactive demo
+│   │   │   ├── DocsPage.jsx      # Documentation
+│   │   │   ├── SDKPage.jsx       # SDK integration guide
+│   │   │   ├── APIPage.jsx       # API reference
+│   │   │   ├── FeaturesPage.jsx  # Feature showcase
+│   │   │   └── AboutPage.jsx     # About the project
+│   │   ├── styles/               # CSS stylesheets
+│   │   └── App.jsx               # Router & layout
 │   └── package.json
 ├── sdk/
 │   ├── turing-defense.js         # Embeddable SDK
