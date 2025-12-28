@@ -119,8 +119,16 @@ class AdvancedBotDetector:
         
         return features
     
-    def predict(self, features):
+    def predict(self, data):
         """Generate prediction with detailed explanations"""
+        # Check if we received raw behavior data or already extracted features
+        if 'mouse_data' in data or 'keyboard_data' in data:
+            # Raw behavior data - extract features first
+            features = self.extract_features(data)
+        else:
+            # Already extracted features
+            features = data
+        
         raw = features.get('raw', {})
         triggers = features.get('triggers', [])
         explanations = features.get('explanations', [])

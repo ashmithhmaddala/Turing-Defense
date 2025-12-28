@@ -719,6 +719,7 @@ if TORCH_AVAILABLE:
                 'verdict': self._get_verdict(bot_score),
                 'model_type': 'neural_network',
                 'feature_importance': self._get_feature_importance(features),
+                'component_scores': self._get_component_scores(features),
                 'triggers': triggers
             }
         
@@ -772,6 +773,7 @@ if TORCH_AVAILABLE:
                 'confidence': round(abs(score - 50) / 50, 3),
                 'verdict': self._get_verdict(score),
                 'model_type': 'heuristic_fallback',
+                'component_scores': self._get_component_scores(features),
                 'triggers': self._generate_triggers(features, score)
             }
         
@@ -794,6 +796,39 @@ if TORCH_AVAILABLE:
             for i, name in enumerate(self.feature_extractor.feature_names[:10]):
                 importance[name] = float(abs(features[i]))
             return importance
+        
+        def _get_component_scores(self, features):
+            """Calculate component scores for frontend display"""
+            # Feature indices: velocity_cv=3, path_straightness=12, curvature_entropy=16, acceleration_cv=7
+            # These are normalized 0-1 where 1 = human-like, 0 = bot-like
+            
+            # Velocity score: higher CV = more human-like (capped at 1.0)
+            velocity_cv = features[3] if len(features) > 3 else 0.5
+            velocity_score = min(1.0, velocity_cv / 0.8)  # 0.8+ CV = full score
+            
+            # Path score: lower straightness = more human-like
+            straightness = features[12] if len(features) > 12 else 0.5
+            path_score = 1.0 - straightness  # Invert: curved paths = higher score
+            
+            # Curvature score: higher entropy = more human-like
+            entropy = features[16] if len(features) > 16 else 2.0
+            curvature_score = min(1.0, entropy / 3.0)  # 3.0+ entropy = full score
+            
+            # Timing score: based on pause patterns and acceleration variance
+            pause_ratio = features[15] if len(features) > 15 else 0.1
+            acc_cv = features[7] if len(features) > 7 else 0.5
+            timing_score = min(1.0, (pause_ratio * 10 + acc_cv) / 1.5)
+            
+            # Keystroke score: placeholder (would need keyboard data)
+            keystroke_score = 0.5  # Neutral when no keyboard data
+            
+            return {
+                'velocity': round(velocity_score, 3),
+                'path': round(path_score, 3),
+                'curvature': round(curvature_score, 3),
+                'timing': round(timing_score, 3),
+                'keystroke': round(keystroke_score, 3)
+            }
         
         def _generate_triggers(self, features, bot_score):
             """Generate human-readable detection signals based on features"""

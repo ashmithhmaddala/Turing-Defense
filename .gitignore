@@ -11,38 +11,56 @@ venv/
 dist/
 build/
 
-# PyTorch
+# PyTorch models (keep only trained models)
 *.pth
 !backend/models/*.pth
 
 # Node
 node_modules/
 npm-debug.log*
+yarn-error.log*
 .npm
+.yarn/
+
+# Build outputs
+client/dist/
+*.egg
+*.whl
 
 # IDE
 .idea/
 .vscode/
 *.swp
 *.swo
+*.sublime-*
+
+# OS
 .DS_Store
+Thumbs.db
+Desktop.ini
 
 # Testing
 .pytest_cache/
 .coverage
 htmlcov/
 .tox/
+.nox/
+coverage.xml
+*.cover
 
 # Environment
 .env
 .env.local
+.env.*.local
 *.log
 
-# Datasets (large files)
+# Datasets (large files - not tracked)
 backend/datasets/balabit/
 backend/datasets/*.csv
 *.csv
 
-# Build outputs
-*.egg
-*.whl
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*~
