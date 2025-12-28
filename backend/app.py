@@ -48,7 +48,13 @@ if detector is None:
     except ImportError:
         print("[ERROR] No detector available!")
 
-app = Flask(__name__)
+# Check if running in production (static files exist)
+import os
+STATIC_FOLDER = os.path.join(os.path.dirname(__file__), '..', 'static')
+if not os.path.exists(STATIC_FOLDER):
+    STATIC_FOLDER = os.path.join(os.path.dirname(__file__), 'static')
+
+app = Flask(__name__, static_folder=STATIC_FOLDER, static_url_path='')
 CORS(app, origins="*")
 socketio = SocketIO(
     app, 
@@ -390,6 +396,26 @@ def handle_reset_session():
     if session_id in sessions:
         del sessions[session_id]
     emit('session_reset', {'status': 'success'})
+
+# ============================================
+# Serve React Frontend (Production)
+# ============================================
+@app.route('/')
+def serve_index():
+    """Serve React app"""
+    if os.path.exists(os.path.join(app.static_folder, 'index.html')):
+        return send_from_directory(app.static_folder, 'index.html')
+    return jsonify({'status': 'API running', 'message': 'Frontend not built. Run npm build in client folder.'}), 200
+
+@app.route('/<path:path>')
+def serve_static(path):
+    """Serve static files or fallback to index.html for SPA routing"""
+    if os.path.exists(os.path.join(app.static_folder, path)):
+        return send_from_directory(app.static_folder, path)
+    # Fallback to index.html for client-side routing
+    if os.path.exists(os.path.join(app.static_folder, 'index.html')):
+        return send_from_directory(app.static_folder, 'index.html')
+    return jsonify({'error': 'Not found'}), 404
 
 if __name__ == '__main__':
     print("Starting Bot Detector Server...")

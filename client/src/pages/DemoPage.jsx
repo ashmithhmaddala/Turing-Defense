@@ -8,7 +8,10 @@ import {
   TrendingUp, Fingerprint, Layers, Clock, BarChart
 } from '../components/Icons';
 
-const BACKEND_URL = 'http://localhost:5000';
+// Use current host in production, localhost in development
+const BACKEND_URL = import.meta.env.PROD 
+  ? window.location.origin 
+  : 'http://localhost:5000';
 
 // Trigger icon component based on type
 const TriggerIcon = ({ type }) => {
